@@ -1,53 +1,79 @@
 const User = require("../models/user");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const { resource } = require("../app");
 
 mongoose.Promise = Promise;
 
-exports.signup = (req, res) => {
+/*
+GIVEN: name, username, email, password, confirmPassword,
+       phonenumber, birthday, city, tags, profileImage url
+RETURN: 'ok' if successfully registered user
+*/
+exports.register = async (req, res) => {
+  console.log("registering");
+  console.log(req.body);
+
   const {
-    id,
-    personalName,
-    personalPicture,
-    professionalName,
-    professionalPicture,
+    name,
+    username,
+    email,
+    password: plaintTextPassword,
+    confirmPassword,
+    phoneNumber,
+    birthday,
+    city,
+    tags,
+    profileImage,
   } = req.body;
 
-  //Create personal profile
-  const userProfilePrivate = new Profile();
-  userProfilePrivate.user = id;
-  userProfilePrivate.type = "PERSONAL";
-  userProfilePrivate.displayedName = personalName;
-  userProfilePrivate.profileImage = personalPicture;
+  if (plaintTextPassword !== confirmPassword)
+    return res.json({ status: 'error', error: 'Passwords do not match!'})
+  
+  if (!name || typeof name !== 'string')
+    return res.json({ status: 'error', error: 'Invalid name!' })
 
-  //Create user
-  const user = new User();
-  user._id = id;
-  user.name = personalName;
+  if (!username || typeof username !== 'string')
+    return res.json({ status: 'error', error: 'Invalid username!' })
 
-  userProfilePrivate
-    .save()
-    .then((personalProfile) => {
-      const personalId = personalProfile._id;
-      user.personalProfile = personalId;
-      userProfilePublic
-        .save()
-        .then((publicProfile) => {
-          const publicId = publicProfile._id;
-          user.professionalProfile = publicId;
-          user
-            .save()
-            .then((result) => {
-              res.status(200).send({ data: result });
-            })
-            .catch((err) => {
-              res.status(404).send({ data: err });
-            });
-        })
-        .catch((err) => {
-          res.status(404).send({ data: err });
-        });
+  if (!email || typeof email !== 'string')
+    return res.json({ status: 'error', error: 'Invalid email!' })
+
+  if (!plaintTextPassword || typeof plaintTextPassword !== 'string')
+    return res.json({ status: 'error', error: 'Invalid password!' })
+
+  const password = await bcrypt.hash(plaintTextPassword, 10);
+  
+  const friends = [];
+  const blocked = [];  
+  const outgoingRequests = [];
+  const incomingRequests = [];
+
+  try {
+    const response = await User.create({
+      name,
+      username,
+      email,
+      password,
+      phoneNumber,
+      birthday,
+      city,
+      profileImage,
+      tags,
+      friends,
+      blocked,
+      outgoingRequests,
+      incomingRequests
     })
-    .catch((err) => {
-      res.status(404).send({ data: err });
-    });
+
+    console.log('User succesfully registered: ', response)
+
+  } catch (error) {
+    if (error.code === 11000) // duplicate key
+      return res.json({ status: 'error', error: 'Username or email already in use!' })
+    
+    throw error
+  }
+  
+  res.json({ status: 'ok' })
 };
