@@ -19,6 +19,6 @@ const requestSchema = new Schema(
   { collection: 'requests' }
 );
 
-const Notification = mongoose.model("Request", requestSchema);
+const Request = mongoose.model("Request", requestSchema);
 
-module.exports = Notification;
+module.exports = Request;

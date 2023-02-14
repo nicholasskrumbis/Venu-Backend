@@ -12,7 +12,4 @@ router.get("/loginWithEmail/:email/:hashedPassword", UserController.loginWithEma
 // post
 router.post("/editProfile", UserController.editProfile);
 
-router.post("/createFriendRequest", UserController.createFriendRequest);
-router.post("/updateRequest", UserController.updateRequest);
-
 module.exports = router;

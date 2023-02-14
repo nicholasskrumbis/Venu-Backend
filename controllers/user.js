@@ -112,62 +112,23 @@ GIVEN: json object with data to be changed
 RETURN: 'ok' if successfully updated profile information
 */
 exports.editProfile = async (req, res) => {
-  const userid = req.body.userid;
-  delete req.body.userid;
+  const username = req.body.username;
+  delete req.body.username;
 
-  User.findByIdAndUpdate(userid, req.body, function (err, docs) {
+  var newInfo = req.body;
+
+  if (req.body.newUsername) {
+      newInfo.username = req.body.newUsername;
+      delete newInfo.newUsername;
+  }
+
+  const user = await User.findOne({ username: username }).lean();
+
+  User.findByIdAndUpdate(user._id, req.body, function (err, docs) {
     if (err) {
       res.status(404).send({ data: err });
     } else {
       res.status(200).send({ data: docs });
     }
   });
-}
-
-exports.createFriendRequest = async (req, res) => {
-  const {
-    requester,
-    receiver
-  } = req.body;
-
-  const requestingUser = await User.findOne({ username: requester })
-    .exec()
-    .catch((err) => res.status(400).send({ data: err }));
-
-  const receivingUser = await User.findOne({ username: receiver })
-    .exec()
-    .catch((err) => res.status(400).send({ data: err }));
-
-  Promise.all([followeePromise, followerPromise])
-    .then(async (profiles) => {
-      const followeeProfile = profiles[0];
-      const followerProfile = profiles[1];
-
-        const request = new Request({
-          requester: followerProfile._id,
-          requestee: followeeProfile._id,
-        });
-        request.save().then(async (requestRes) => {
-          followeeProfile.incomingRequests.push(requestRes._id);
-          followerProfile.outgoingRequests.push(requestRes._id);
-          const followeeSave = await followeeProfile
-            .save()
-            .catch((err) => res.status(404).send({ data: err }));
-          const followerSave = await followerProfile
-            .save()
-            .catch((err) => res.status(404).send({ data: err }));
-          Promise.all([followeeSave, followerSave])
-            .then(() => {
-              res.status(200).send({ data: request });
-            })
-            .catch((err) => res.status(404).send({ data: err }));
-        });
-    })
-    .catch((err) => {
-      res.status(404).send({ data: err });
-    });
-}
-
-exports.updateRequest = async (req, res) => {
-  
 }
