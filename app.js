@@ -10,6 +10,7 @@ var usersRouter = require('./routes/user');
 var storyRouter = require('./routes/story');
 var registerRouter = require('./routes/register');
 var requestRouter = require('./routes/request');
+var fidelRouter = require('./routes/fidel');
 
 var app = express();
 
@@ -29,10 +30,11 @@ app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/story', storyRouter);
 app.use('/register', registerRouter);
 app.use('/request', requestRouter);
+app.use('/fidel', fidelRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

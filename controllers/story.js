@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const Story = require("../models/story");
+const mongoose = require("mongoose");
 
 /* GET */
 
@@ -9,9 +10,12 @@ RETURN: list of story objects from user friends
 */
 exports.getFriendsStory = async (req, res) => {
     const user = await User.findOne({ _id: req.params._id }).lean();
+    var stories = []
 
     for (let i = 0; i < user.friends.length; i++) {
+      Story.find({ user: mongoose.Types.ObjectId(user.friends[i]) },
 
+      );
     }
 }
 
@@ -32,7 +36,7 @@ exports.getAllStories = async (req, res) => {
 /* POST */
 
 /*
-GIVEN: user id, image url
+GIVEN: userid, image url
 RETURN: 'ok' if successfully created new story
 */
 exports.createStory = async (req, res) => {
@@ -43,7 +47,7 @@ exports.createStory = async (req, res) => {
       
     try {
       const response = await Story.create({
-          user,
+          user: mongoose.Types.ObjectId(user),
           image
       })
   

@@ -9,7 +9,7 @@ router.get("/searchUsers/:username", UserController.searchUsers);
 router.get("/loginWithUsername/:username/:hashedPassword", UserController.loginWithUsername);
 router.get("/loginWithEmail/:email/:hashedPassword", UserController.loginWithEmail);
 
-// post
-router.post("/editProfile", UserController.editProfile);
+// put
+router.put("/editProfile", UserController.editProfile);
 
 module.exports = router;

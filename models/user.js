@@ -45,6 +45,12 @@ const userSchema = new Schema(
         required: false,
       }
     ],
+    cards: [
+      {
+        type: String,
+        required: false,
+      }
+    ],
     friends: [
       {
         type: ObjectID, 
