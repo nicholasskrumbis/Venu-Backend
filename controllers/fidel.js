@@ -29,6 +29,7 @@ exports.uploadCard = (req, res) => {
         console.log(result)
         var resJson = JSON.parse(result);
         if (resJson["status"] == 400) {
+          /// TODO : push card id to user "cards" field
           res.status(400).send({ data: resJson })
         } else {
           res.status(200).send({ data: resJson })
@@ -96,7 +97,7 @@ exports.isActive = (req, res) => {
           if (resJson.items?.metadata?.isActive) {
             res.status(200).send({ data: { "isActive": true } })
           } else {
-            res.status(200).send({ data: { "isActive": false} })
+            res.status(200).send({ data: { "isActive": false } })
           }
         }
       })
