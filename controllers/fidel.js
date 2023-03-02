@@ -1,6 +1,7 @@
 const User = require("../models/user");
+const mongoose = require("mongoose");
 
-exports.uploadCard = (req, res) => {
+exports.uploadCard = async (req, res) => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Fidel-Key", "pk_test_6831a077-74e8-4c7f-89d2-114a03b3ed94");
@@ -26,16 +27,30 @@ exports.uploadCard = (req, res) => {
     fetch("https://api.fidel.uk/v1/programs/8fad6519-199f-4695-a238-c2c4ea202db0/cards", requestOptions)
       .then(response => response.text())
       .then(result => {
-        console.log(result)
-        var resJson = JSON.parse(result);
-        if (resJson["status"] == 400) {
-          /// TODO : push card id to user "cards" field
-          res.status(400).send({ data: resJson })
-        } else {
-          res.status(200).send({ data: resJson })
+        const resJson = JSON.parse(result);
+        const cardid = resJson["items"][0].id;
+        console.log(resJson);
+        if (resJson["status"] == 201) {
+            console.log("addding to userrrrrr")
+            console.log(req.body.userid)
+            User.update(
+                { _id: mongoose.Types.ObjectId(req.body.userid) },
+                { $push: { cards: cardid } },
+                function(err, docs) {
+                  if (err)
+                    res.status(404).send({ data: err });
+                  else 
+                    res.status(200).send({ data: resJson })
+                }
+            );
+        } else {      
+            res.status(resJson["status"]).send({ data: resJson });   
         }
       })
-      .catch(error => res.status(400).send({ data: error }));
+      .catch(error => {
+        console.log(error)
+        res.status(400).send({ data: error })
+      });
 }
 
 exports.updateCardStatus = (req, res) => {
@@ -63,20 +78,22 @@ exports.updateCardStatus = (req, res) => {
     fetch("https://api.fidel.uk/v1/cards/"+cardid+"/metadata", requestOptions)
       .then(response => response.text())
       .then(result => {
-        console.log(result)
-        var resJson = JSON.parse(result);
-        if (resJson["status"] == 400) {
-          res.status(400).send({ data: resJson })
+        const resJson = JSON.parse(result);
+        if (resJson["status"] == 200) {
+          res.status(200).send({ data: resJson });
         } else {
-          res.status(200).send({ data: resJson })
+          res.status(resJson["status"]).send({ data: resJson });
         }
       })
-      .catch(error => res.status(400).send({ data: error }));
+      .catch(error => {
+        console.log(error)
+        res.status(400).send({ data: error })
+      });
 }
 
 exports.isActive = (req, res) => {
     var myHeaders = new Headers();
-    myHeaders.append("Fidel-Key", "pk_test_6831a077-74e8-4c7f-89d2-114a03b3ed94");
+    myHeaders.append("Fidel-Key", "sk_test_d6e16caa-53bb-46c3-81b7-99c1f2583686");
 
     const cardid = req.params["cardid"];
 
@@ -89,20 +106,15 @@ exports.isActive = (req, res) => {
     fetch("https://api.fidel.uk/v1/cards/"+cardid, requestOptions)
       .then(response => response.text())
       .then(result => {
-        console.log(result)
         var resJson = JSON.parse(result);
-        if (resJson["status"] == 400) {
-          res.status(400).send({ data: resJson })
+        if (resJson["status"] != 200) {
+          res.status(resJson["status"]).send({ data: resJson })
         } else {
-          if (resJson.items?.metadata?.isActive) {
-            res.status(200).send({ data: { "isActive": true } })
-          } else {
-            res.status(200).send({ data: { "isActive": false } })
-          }
+          res.status(200).send({ data: { "isActive": resJson["items"][0].metadata?.isActive } })
         }
       })
       .catch(error => {
-        console.log(error);
+        console.log(error)
         res.status(400).send({ data: error })
     });
 }

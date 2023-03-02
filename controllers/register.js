@@ -46,6 +46,7 @@ exports.register = async (req, res) => {
   
   const friends = [];
   const blocked = [];  
+  const cards = [];
   const outgoingRequests = [];
   const incomingRequests = [];
 
@@ -60,6 +61,7 @@ exports.register = async (req, res) => {
       city,
       profileImage,
       tags,
+      cards,
       friends,
       blocked,
       outgoingRequests,

@@ -89,7 +89,6 @@ exports.updateRequestStatus = async (req, res) => {
   );
 
   if (accept) { // add the each user to friends list
-    console.log("here");
     User.update(
       { username: receiver },
       { $push: { friends: mongoose.Types.ObjectId(requestingUser._id) } },
