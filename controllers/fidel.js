@@ -28,14 +28,14 @@ exports.uploadCard = async (req, res) => {
       .then(response => response.text())
       .then(result => {
         const resJson = JSON.parse(result);
-        const cardid = resJson["items"][0].id;
+        const cardId = resJson["items"][0].id;
         console.log(resJson);
         if (resJson["status"] == 201) {
             console.log("addding to userrrrrr")
-            console.log(req.body.userid)
+            console.log(req.body.userId)
             User.update(
-                { _id: mongoose.Types.ObjectId(req.body.userid) },
-                { $push: { cards: cardid } },
+                { _id: mongoose.Types.ObjectId(req.body.userId) },
+                { $push: { cards: cardId } },
                 function(err, docs) {
                   if (err)
                     res.status(404).send({ data: err });
@@ -58,7 +58,7 @@ exports.updateCardStatus = (req, res) => {
     myHeaders.append("Fidel-Key", "sk_test_d6e16caa-53bb-46c3-81b7-99c1f2583686");
     myHeaders.append("Content-Type", "application/json");
 
-    const cardid = req.params["cardid"];
+    const cardId = req.params["cardId"];
 
     var isActive = true;
     if (req.params["status"] == "inactive")
@@ -75,7 +75,7 @@ exports.updateCardStatus = (req, res) => {
       redirect: 'follow'
     };
 
-    fetch("https://api.fidel.uk/v1/cards/"+cardid+"/metadata", requestOptions)
+    fetch("https://api.fidel.uk/v1/cards/"+cardId+"/metadata", requestOptions)
       .then(response => response.text())
       .then(result => {
         const resJson = JSON.parse(result);
@@ -95,7 +95,7 @@ exports.isActive = (req, res) => {
     var myHeaders = new Headers();
     myHeaders.append("Fidel-Key", "sk_test_d6e16caa-53bb-46c3-81b7-99c1f2583686");
 
-    const cardid = req.params["cardid"];
+    const cardId = req.params["cardId"];
 
     var requestOptions = {
       method: 'GET',
@@ -103,7 +103,7 @@ exports.isActive = (req, res) => {
       redirect: 'follow'
     };
 
-    fetch("https://api.fidel.uk/v1/cards/"+cardid, requestOptions)
+    fetch("https://api.fidel.uk/v1/cards/"+cardId, requestOptions)
       .then(response => response.text())
       .then(result => {
         var resJson = JSON.parse(result);
@@ -117,4 +117,9 @@ exports.isActive = (req, res) => {
         console.log(error)
         res.status(400).send({ data: error })
     });
+}
+
+exports.onTransaction = (req, res) => {
+    const cardId = req.card.id;
+    const brandId = req.brand.id;
 }
