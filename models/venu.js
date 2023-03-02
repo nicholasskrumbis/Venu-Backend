@@ -9,6 +9,10 @@ const venuSchema = new Schema(
         type: String,
         required: true,
     },
+    brandId: {
+        type: String,
+        required: false,
+    },
     address: {
         type: String,
         required: true,

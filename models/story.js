@@ -5,10 +5,14 @@ const ObjectID = mongoose.Schema.Types.ObjectId;
 
 const storySchema = new Schema(
   {
-    user: {
+    userId: {
         type: ObjectID,
         ref: "User",
         required: true,
+    },
+    venuId: {
+        type: String,
+        required: true
     },
     image: {
         type: String,

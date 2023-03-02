@@ -6,17 +6,33 @@ const mongoose = require("mongoose");
 
 /*
 GIVEN: user id
-RETURN: list of story objects from user friends
+RETURN: list of story objects from a users friends
 */
 exports.getFriendsStory = async (req, res) => {
-    const user = await User.findOne({ _id: req.params._id }).lean();
-    var stories = []
+
+    console.log(req.params.userid)
+
+    const user = await User.findOne({ _id: req.params.userid }).lean();
+    var stories = [];
+
+    console.log(user)
 
     for (let i = 0; i < user.friends.length; i++) {
-      Story.find({ user: mongoose.Types.ObjectId(user.friends[i]) },
 
-      );
+      console.log("getting fried")
+      console.log(user.friends[i])
+      const aggCursor = Story.aggregate([{
+          $match: {
+            userId: user.friends[i]
+            }
+        }])
+
+      for await (const doc of aggCursor) {
+        stories.push(doc);
+      }
     }
+
+    res.status(200).send( { data: stories })
 }
 
 /*
@@ -41,14 +57,15 @@ RETURN: 'ok' if successfully created new story
 */
 exports.createStory = async (req, res) => {
   const {
-      user,
+      userId,
       image,
     } = req.body;
       
     try {
       const response = await Story.create({
-          user: mongoose.Types.ObjectId(user),
-          image
+          userId: mongoose.Types.ObjectId(userId),
+          venuId: "somevenuid",
+          image: "imageurl"
       })
   
       console.log('Story succesfully created: ', response)

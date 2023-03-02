@@ -1,6 +1,10 @@
 const User = require("../models/user");
+const Venu = require("../models/venu");
+const Story = require("../models/story");
 const mongoose = require("mongoose");
 
+/*
+*/
 exports.uploadCard = async (req, res) => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -53,6 +57,8 @@ exports.uploadCard = async (req, res) => {
       });
 }
 
+/*
+*/
 exports.updateCardStatus = (req, res) => {
     var myHeaders = new Headers();
     myHeaders.append("Fidel-Key", "sk_test_d6e16caa-53bb-46c3-81b7-99c1f2583686");
@@ -60,9 +66,13 @@ exports.updateCardStatus = (req, res) => {
 
     const cardId = req.params["cardId"];
 
-    var isActive = true;
+    var isActive;
     if (req.params["status"] == "inactive")
         isActive = false;
+    else if (req.params["status"] == "active")
+        isActive = true;
+    else
+        res.status(400).send({ data: { error: "Invalid parameters." }});
 
     var raw = JSON.stringify({
       "isActive": isActive
@@ -91,6 +101,8 @@ exports.updateCardStatus = (req, res) => {
       });
 }
 
+/*
+*/
 exports.isActive = (req, res) => {
     var myHeaders = new Headers();
     myHeaders.append("Fidel-Key", "sk_test_d6e16caa-53bb-46c3-81b7-99c1f2583686");
@@ -119,7 +131,27 @@ exports.isActive = (req, res) => {
     });
 }
 
-exports.onTransaction = (req, res) => {
-    const cardId = req.card.id;
-    const brandId = req.brand.id;
+/*
+*/
+exports.onTransaction = async (req, res) => {
+    const brandId = req.body.brand.id;
+    const userId = req.body.card.metadata.userId;
+
+    const venu = await Venu.findOne({ brandId: brandId }).lean();
+
+    try {
+        const response = await Story.create({
+          userId: userId,
+          venuId: venu._id,
+          image: "someimageurl"
+        })
+
+        console.log('Story succesfully created: ', response)
+    } catch (error) {
+        if (error.code === 11000) // duplicate key
+          return res.json({ status: 'error', error: 'Duplicate request' })
+        throw error
+    }
+      
+      res.status(200).send({ status: 'ok' })
 }
